@@ -6,12 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "generate": "prisma generate",
+    "postinstall": "prisma generate",
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:deploy": "prisma migrate deploy",
-    "seed": "node prisma/seed.js",
-    "deploy:full": "npm run prisma:generate && npm run prisma:deploy && npm run seed"
+    "seed": "prisma generate && node prisma/seed.js",
+  "deploy": "prisma migrate deploy && npm run seed"
   },
   "dependencies": {
     "next": "15.3.0",

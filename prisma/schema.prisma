@@ -1,7 +1,7 @@
 // schema.prisma
 generator client {
   provider = "prisma-client-js"
-  output   = "./node_modules/.prisma/client" // Adicione esta linha para evitar warnings
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -10,33 +10,37 @@ datasource db {
 }
 
 model Livro {
-  id          Int        @id @default(autoincrement())
-  numeroTombo String     @unique @db.VarChar(20)
-  titulo      String     @db.VarChar(150)
-  autor       String     @db.VarChar(100)
-  editora     String?    @db.VarChar(100)
-  genero      String?    @db.VarChar(50)
-  emprestimos Emprestimo[] // Relação com Emprestimo
+  id          Int             @id @default(autoincrement())
+  numeroTombo String          @unique @db.VarChar(20)
+  titulo      String          @db.VarChar(150)
+  autor       String          @db.VarChar(100)
+  editora     String?         @db.VarChar(100)
+  genero      String?         @db.VarChar(50)
+  emprestimos EmprestimoLivro[]  // Relação ajustada
 
-  @@index([numeroTombo,titulo, autor, genero])
+  @@index([numeroTombo, titulo, autor, genero])
   @@map("livros")
 }
 
-model Emprestimo {
-  id              Int       @id @default(autoincrement())
-  livro           Livro     @relation(fields: [livroId], references: [id])
-  livroId         Int
-  quantidade      Int       @default(1) // Valor padrão
-  tipoPessoa      String    @db.VarChar(20) // Melhor seria usar enum
-  nomePessoa      String    @db.VarChar(100)
-  serie           String?   @db.VarChar(50)
-  turma           String?   @db.VarChar(10)
-  dataEmprestimo  DateTime  @default(now())
-  dataDevolucao   DateTime
-  devolvido       Boolean   @default(false)
+// MODELO RENOMEADO (de Emprestimo para EmprestimoLivro)
+model EmprestimoLivro {
+  id                  Int       @id @default(autoincrement())
+  livro               Livro     @relation(fields: [livroId], references: [id])
+  livroId             Int
+  quantidade          Int       @default(1)
+  tipoPessoa          String    @db.VarChar(20)
+  nomePessoa          String    @db.VarChar(100)
+  serie               String?   @db.VarChar(50)
+  turma               String?   @db.VarChar(10)
+  dataEmprestimo      DateTime  @default(now())
+  dataDevolucao       DateTime
+  dataDevolucaoEfetiva DateTime?  // CAMPO NOVO ADICIONADO
+  devolvido           Boolean   @default(false)
+
   @@index([livroId])
-  @@map("emprestimos")
+  @@map("emprestimos_livros")
 }
+
 enum TipoPessoa {
   ALUNO
   PROFESSOR

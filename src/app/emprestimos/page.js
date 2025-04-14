@@ -7,6 +7,7 @@ export default function EmprestimosPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('ativos');
   const [message, setMessage] = useState({ text: '', type: '' });
+  const [emprestimoParaDeletar, setEmprestimoParaDeletar] = useState(null);
 
   useEffect(() => {
     const carregarDados = async () => {
@@ -60,6 +61,32 @@ export default function EmprestimosPage() {
     }
   };
 
+  const handleExcluirEmprestimo = async () => {
+    try {
+      const response = await fetch('/api/listaEmprestimos', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: emprestimoParaDeletar.id })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setEmprestimos(prev => prev.filter(emp => emp.id !== emprestimoParaDeletar.id));
+        setHistorico(prev => prev.filter(emp => emp.id !== emprestimoParaDeletar.id));
+        setMessage({ text: 'Empréstimo excluído com sucesso!', type: 'success' });
+      } else {
+        throw new Error(data.error || 'Erro ao excluir empréstimo');
+      }
+    } catch (error) {
+      setMessage({ text: error.message, type: 'error' });
+    } finally {
+      setEmprestimoParaDeletar(null);
+    }
+  };
+
   const formatarData = (dataString) => {
     try {
       const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
@@ -104,10 +131,16 @@ export default function EmprestimosPage() {
               ✔️ Confirmar
             </button>
           )}
+          <button
+            onClick={() => setEmprestimoParaDeletar(emp)}
+            className="btn-excluir"
+            disabled={loading}
+          >
+            🗑️ Excluir
+          </button>
         </td>
       </tr>
     );
-    
   };
 
   return (
@@ -156,6 +189,36 @@ export default function EmprestimosPage() {
               : historico.map(renderLinhaEmprestimo)}
           </tbody>
         </table>
+      )}
+
+      {/* Modal de Confirmação de Exclusão */}
+      {emprestimoParaDeletar && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Confirmar Exclusão</h3>
+            <p>
+              Tem certeza que deseja excluir permanentemente o empréstimo do livro:
+              <br />
+              <strong>{emprestimoParaDeletar.livro?.titulo || 'Livro não encontrado'}</strong>
+              <br />
+              para <strong>{emprestimoParaDeletar.nomePessoa}</strong>?
+            </p>
+            <div className="modal-buttons">
+              <button 
+                onClick={() => setEmprestimoParaDeletar(null)}
+                className="btn-cancelar"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={handleExcluirEmprestimo}
+                className="btn-confirmar-exclusao"
+              >
+                Confirmar Exclusão
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

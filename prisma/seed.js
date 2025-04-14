@@ -1,46 +1,35 @@
 // prisma/seed.js
 const { PrismaClient } = require('@prisma/client');
-const livrosData = require('./livros.json');
-const fs = require('fs');
-
-const prisma = new PrismaClient();
+const livros = require('./livros.json');
 
 async function main() {
-  console.log('🔍 Verificando arquivo livros.json...');
-  
-  // Validação do arquivo
-  if (!fs.existsSync('./prisma/livros.json')) {
-    throw new Error('Arquivo livros.json não encontrado!');
-  }
-
-  console.log(`📚 Iniciando importação de ${livrosData.length} livros...`);
+  const prisma = new PrismaClient({
+    log: ['query', 'info', 'warn', 'error']
+  });
 
   try {
-    // Usando transaction para melhor performance
-    const result = await prisma.$transaction(
-      livrosData.map(livro => 
-        prisma.livro.upsert({
-          where: { numeroTombo: String(livro.numeroTombo) },
-          update: {},
-          create: {
-            numeroTombo: String(livro.numeroTombo),
-            titulo: livro.titulo,
-            autor: livro.autor,
-            editora: livro.editora || null,
-            genero: livro.genero || null
-          }
-        })
-      )
-    );
+    console.log(`Importando ${livros.length} livros...`);
     
-    console.log(`✅ ${result.length} livros importados com sucesso!`);
+    for (const livro of livros) {
+      await prisma.livro.upsert({
+        where: { numeroTombo: livro.numeroTombo },
+        update: {},
+        create: {
+          numeroTombo: livro.numeroTombo,
+          titulo: livro.titulo,
+          autor: livro.autor,
+          editora: livro.editora || null,
+          genero: livro.genero || null
+        }
+      });
+      console.log(`✔ ${livro.titulo}`);
+    }
   } catch (error) {
-    console.error('❌ Erro durante o seed:', error.message);
+    console.error("Erro:", error);
     process.exit(1);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
-main()
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+main();

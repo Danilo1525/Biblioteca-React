@@ -1,1 +1,39 @@
-node_modules
+# =================================
+# Configurações Sensíveis
+# =================================
+.env                # Arquivo principal de ambiente
+.env.local          # Configurações locais
+.env.development    # Variáveis de desenvolvimento
+.env.production     # Variáveis de produção
+.env.test           # Variáveis para testes
+
+# =================================
+# Prisma
+# =================================
+/prisma/migrations  # Pasta de migrações (contém histórico sensível)
+/prisma/*.db        # Bancos de dados locais (SQLite)
+.prisma/            # Cache do cliente Prisma
+
+# =================================
+# Dependências e Build
+# =================================
+node_modules/       # Dependências do Node
+dist/               # Pasta de build (se usar TypeScript/Babel)
+.cache/             # Cache de ferramentas
+*.log               # Arquivos de log
+
+# =================================
+# IDE/Editores
+# =================================
+.idea/              # Configurações do IntelliJ/WebStorm
+.vscode/            # Configurações do VS Code
+*.swp               # Arquivos temporários do Vim
+*.swo               # Arquivos temporários do Vim
+
+# =================================
+# Sistema Operacional
+# =================================
+.DS_Store           # Metadados do macOS
+Thumbs.db           # Cache de thumbnails do Windows
+# Next.js
+.next/
