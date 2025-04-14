@@ -36,4 +36,5 @@ dist/               # Pasta de build (se usar TypeScript/Babel)
 .DS_Store           # Metadados do macOS
 Thumbs.db           # Cache de thumbnails do Windows
 # Next.js
-.next/
+.next/node_modules/
+.env
