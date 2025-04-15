@@ -2,95 +2,32 @@
 import { useState } from "react";
 
 export default function RegistrarEmprestimoPage() {
-  const [formData, setFormData] = useState({
-    buscar_tombo: "",
-    tombo_emprestimo: "",
-    quantidade_emprestimo: 1,
-    tipo_pessoa: "",
-    nome_estudante: "",
-    serie_estudante: "",
-    turma: "",
-    nome_professor: "",
-    data_devolucao: "",
-  });
+  // ... (mantenha todos os estados existentes)
 
-  const [livroInfo, setLivroInfo] = useState(null);
-  const [showAlunoFields, setShowAlunoFields] = useState(false);
-  const [showProfessorFields, setShowProfessorFields] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ text: "", type: "" });
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
 
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const handleTipoPessoaChange = (e) => {
-    const value = e.target.value;
-    setFormData((prev) => ({ ...prev, tipo_pessoa: value }));
-    setShowAlunoFields(value === "aluno");
-    setShowProfessorFields(value === "professor");
-  };
-
-  const validateNumber = (e) => {
-    if (e.target.value < 0) e.target.value = 1;
-    handleChange(e);
-  };
-
-  const handleBuscarLivro = async (e) => {
-    e.preventDefault();
-    if (!formData.buscar_tombo) {
-      setMessage({ text: "Por favor, informe o número do tombo", type: "error" });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/livros?tombo=${formData.buscar_tombo}`);
-      const data = await response.json();
-
-      if (response.ok) {
-        setLivroInfo(data);
-        setFormData(prev => ({ ...prev, tombo_emprestimo: formData.buscar_tombo }));
-        setMessage({ text: "Livro encontrado!", type: "success" });
-      } else {
-        throw new Error(data.error || "Livro não encontrado");
-      }
-    } catch (error) {
-      setLivroInfo(null);
-      setMessage({ text: error.message, type: "error" });
-    } finally {
-      setLoading(false);
-    }
-  };
+  // ... (mantenha todas as funções existentes)
 
   const handleEmprestarLivro = async (e) => {
     e.preventDefault();
     
-    // Validações básicas
-    if (!formData.tombo_emprestimo || !formData.quantidade_emprestimo || 
-        !formData.tipo_pessoa || !formData.data_devolucao) {
-      setMessage({ text: "Por favor, preencha todos os campos obrigatórios", type: "error" });
+    // Mostra o modal de senha primeiro
+    setShowPasswordModal(true);
+  };
+
+  const confirmarComSenha = async () => {
+    if (passwordInput !== "bibliotecaeepjd") {
+      setMessage({ text: "Senha incorreta!", type: "error" });
+      setShowPasswordModal(false);
       return;
     }
 
-    if (formData.tipo_pessoa === "aluno" && (!formData.nome_estudante || !formData.serie_estudante)) {
-      setMessage({ text: "Para alunos, é necessário informar o nome e a série", type: "error" });
-      return;
-    }
-
-    if (formData.tipo_pessoa === "professor" && !formData.nome_professor) {
-      setMessage({ text: "Para professores, é necessário informar o nome", type: "error" });
-      return;
-    }
-
-    if (!livroInfo) {
-      setMessage({ text: "Por favor, busque o livro primeiro", type: "error" });
-      return;
-    }
-
+    setShowPasswordModal(false);
     setLoading(true);
+    
     try {
+      // Restante da lógica de empréstimo (igual à sua função original)
       const emprestimoData = {
         livroId: livroInfo.id,
         quantidade: parseInt(formData.quantidade_emprestimo),
@@ -141,265 +78,235 @@ export default function RegistrarEmprestimoPage() {
 
   return (
     <div className="container">
-      <h1>Registrar Empréstimo</h1>
+      {/* ... (mantenha todo o conteúdo existente) */}
       
-      {message.text && (
-        <div className={`message ${message.type}`}>
-          {message.text}
+      {/* Modal de Confirmação com Senha */}
+      {showPasswordModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Confirmação de Empréstimo</h3>
+            <p>Digite a senha de administrador para confirmar:</p>
+            <input
+              type="password"
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
+              placeholder="Digite a senha"
+              className="password-input"
+            />
+            <div className="modal-buttons">
+              <button 
+                onClick={() => setShowPasswordModal(false)}
+                className="cancel-btn"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={confirmarComSenha}
+                className="confirm-btn"
+                disabled={loading}
+              >
+                {loading ? "Verificando..." : "Confirmar"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
-
-      <div className="section">
-        <h2>Buscar Livro</h2>
-        <form onSubmit={handleBuscarLivro} className="search-form">
-          <input
-            type="number"
-            id="buscar_tombo"
-            min="1"
-            onChange={validateNumber}
-            placeholder="Número do Tombo"
-            value={formData.buscar_tombo}
-            disabled={loading}
-          />
-          <button type="submit" disabled={loading}>
-            {loading ? "Buscando..." : "Buscar"}
-          </button>
-        </form>
-        
-        {livroInfo && (
-          <div className="livro-info">
-            <h3>Informações do Livro:</h3>
-            <p><strong>Título:</strong> {livroInfo.titulo}</p>
-            <p><strong>Autor:</strong> {livroInfo.autor}</p>
-            <p><strong>Tombo:</strong> {livroInfo.numeroTombo}</p>
-            <p><strong>Status:</strong> {livroInfo.status}</p>
-            {livroInfo.status === 'Emprestado' && (
-              <p><strong>Emprestado para:</strong> {livroInfo.destinatario}</p>
-            )}
-          </div>
-        )}
-      </div>
-
-      <div className="section">
-        <h2>Dados do Empréstimo</h2>
-        <form onSubmit={handleEmprestarLivro} className="emprestimo-form">
-          <div className="form-group">
-            <label htmlFor="tombo_emprestimo">Tombo do Livro:</label>
-            <input
-              type="text"
-              id="tombo_emprestimo"
-              value={formData.tombo_emprestimo}
-              onChange={handleChange}
-              required
-              readOnly
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="quantidade_emprestimo">Quantidade:</label>
-            <input
-              type="number"
-              id="quantidade_emprestimo"
-              min="1"
-              onChange={validateNumber}
-              value={formData.quantidade_emprestimo}
-              required
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="tipo_pessoa">Tipo de Pessoa:</label>
-            <select
-              id="tipo_pessoa"
-              onChange={handleTipoPessoaChange}
-              value={formData.tipo_pessoa}
-              required
-              disabled={loading}
-            >
-              <option value="" disabled>Selecione o tipo</option>
-              <option value="aluno">Aluno</option>
-              <option value="professor">Professor</option>
-            </select>
-          </div>
-
-          {showAlunoFields && (
-            <div className="form-group">
-              <label htmlFor="nome_estudante">Nome do Aluno:</label>
-              <input
-                type="text"
-                id="nome_estudante"
-                value={formData.nome_estudante}
-                onChange={handleChange}
-                required={showAlunoFields}
-                disabled={loading}
-              />
-            </div>
-          )}
-
-          {showAlunoFields && (
-            <div className="form-group">
-              <label htmlFor="serie_estudante">Série:</label>
-              <select
-                id="serie_estudante"
-                value={formData.serie_estudante}
-                onChange={handleChange}
-                required={showAlunoFields}
-                disabled={loading}
-              >
-                <option value="" disabled>Selecione a série</option>
-                <optgroup label="Ensino Fundamental">
-                  <option value="6_matutino">6º Ano - Matutino</option>
-                  <option value="6_vespertino">6º Ano - Vespertino</option>
-                  <option value="6_integral">6º Ano - Integral</option>
-                  <option value="7_matutino">7º Ano - Matutino</option>
-                  <option value="7_vespertino">7º Ano - Vespertino</option>
-                  <option value="7_integral">7º Ano - Integral</option>
-                  <option value="8_matutino">8º Ano - Matutino</option>
-                  <option value="8_vespertino">8º Ano - Vespertino</option>
-                  <option value="8_integral">8º Ano - Integral</option>
-                  <option value="9_matutino">9º Ano - Matutino</option>
-                  <option value="9_vespertino">9º Ano - Vespertino</option>
-                  <option value="9_integral">9º Ano - Integral</option>
-                </optgroup>
-                <optgroup label="Ensino Médio">
-                  <option value="1_vespertino">1º Ano - Vespertino</option>
-                  <option value="1_integral">1º Ano - Integral</option>
-                  <option value="2_vespertino">2º Ano - Vespertino</option>
-                  <option value="2_integral">2º Ano - Integral</option>
-                  <option value="3_vespertino">3º Ano - Vespertino</option>
-                  <option value="3_integral">3º Ano - Integral</option>
-                </optgroup>
-              </select>
-            </div>
-          )}
-
-          {showAlunoFields && (
-            <div className="form-group">
-              <label htmlFor="turma">Turma:</label>
-              <select
-                id="turma"
-                value={formData.turma}
-                onChange={handleChange}
-                disabled={loading}
-              >
-                <option value="" disabled>Selecione a turma</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="C">C</option>
-              </select>
-            </div>
-          )}
-
-          {showProfessorFields && (
-            <div className="form-group">
-              <label htmlFor="nome_professor">Nome do Professor:</label>
-              <input
-                type="text"
-                id="nome_professor"
-                value={formData.nome_professor}
-                onChange={handleChange}
-                required={showProfessorFields}
-                disabled={loading}
-              />
-            </div>
-          )}
-
-          <div className="form-group">
-            <label htmlFor="data_devolucao">Data de Devolução:</label>
-            <input
-              type="date"
-              id="data_devolucao"
-              value={formData.data_devolucao}
-              onChange={handleChange}
-              required
-              disabled={loading}
-            />
-          </div>
-
-          <button type="submit" disabled={loading || !livroInfo} className="submit-btn">
-            {loading ? "Processando..." : "Registrar Empréstimo"}
-          </button>
-        </form>
-      </div>
 
       <style jsx>{`
         .container {
           max-width: 800px;
-          margin: 0 auto;
-          padding: 20px;
+          margin: 2rem auto;
+          padding: 2rem;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        h1 {
+          color: #2c3e50;
+          text-align: center;
+          margin-bottom: 2rem;
+          font-size: 2rem;
+        }
+        
+        h2 {
+          color: #3498db;
+          margin-bottom: 1rem;
+          font-size: 1.5rem;
+          border-bottom: 2px solid #eee;
+          padding-bottom: 0.5rem;
         }
         
         .section {
-          margin-bottom: 30px;
-          padding: 20px;
-          background: #f9f9f9;
-          border-radius: 8px;
+          margin-bottom: 2rem;
+          padding: 1.5rem;
+          background: #f8fafc;
+          border-radius: 10px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         
         .message {
-          padding: 10px 15px;
-          margin-bottom: 20px;
-          border-radius: 4px;
+          padding: 1rem;
+          margin-bottom: 1.5rem;
+          border-radius: 8px;
+          font-weight: 500;
+          text-align: center;
         }
         
         .message.success {
-          background-color: #d4edda;
-          color: #155724;
+          background-color: #d1fae5;
+          color: #065f46;
+          border: 1px solid #a7f3d0;
         }
         
         .message.error {
-          background-color: #f8d7da;
-          color: #721c24;
+          background-color: #fee2e2;
+          color: #b91c1c;
+          border: 1px solid #fca5a5;
         }
         
         .form-group {
-          margin-bottom: 15px;
+          margin-bottom: 1.25rem;
         }
         
         label {
           display: block;
-          margin-bottom: 5px;
-          font-weight: bold;
+          margin-bottom: 0.5rem;
+          font-weight: 600;
+          color: #4b5563;
         }
         
         input, select {
           width: 100%;
-          padding: 8px;
-          border: 1px solid #ddd;
-          border-radius: 4px;
+          padding: 0.75rem;
+          border: 1px solid #d1d5db;
+          border-radius: 8px;
+          font-size: 1rem;
+          transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
         
         .search-form, .emprestimo-form {
           display: flex;
           flex-direction: column;
-          gap: 15px;
+          gap: 1rem;
         }
         
         button {
-          padding: 10px 15px;
-          background-color: #0070f3;
-          color: white;
-          border: none;
-          border-radius: 4px;
+          padding: 0.75rem 1.5rem;
+          font-weight: 600;
+          border-radius: 8px;
           cursor: pointer;
+          transition: all 0.2s;
+          font-size: 1rem;
         }
         
         button:disabled {
-          background-color: #ccc;
+          opacity: 0.7;
           cursor: not-allowed;
         }
         
         .submit-btn {
-          margin-top: 10px;
-          background-color: #28a745;
+          margin-top: 1rem;
+          background-color: #10b981;
+          color: white;
+          border: none;
+        }
+        
+        .submit-btn:hover:not(:disabled) {
+          background-color: #059669;
         }
         
         .livro-info {
-          margin-top: 15px;
-          padding: 10px;
-          background: #e9ecef;
-          border-radius: 4px;
+          margin-top: 1.5rem;
+          padding: 1rem;
+          background: #e0e7ff;
+          border-radius: 8px;
+          color: #1e40af;
+          border-left: 4px solid #3b82f6;
+        }
+        
+        .livro-info p {
+          margin: 0.5rem 0;
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+        }
+        
+        .modal-content {
+          background: white;
+          padding: 2rem;
+          border-radius: 12px;
+          width: 90%;
+          max-width: 400px;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-content h3 {
+          margin-top: 0;
+          color: #1e40af;
+        }
+        
+        .password-input {
+          width: 100%;
+          padding: 0.75rem;
+          margin: 1rem 0;
+          border: 2px solid #e2e8f0;
+          border-radius: 8px;
+          font-size: 1rem;
+        }
+        
+        .modal-buttons {
+          display: flex;
+          gap: 1rem;
+          justify-content: flex-end;
+        }
+        
+        .cancel-btn {
+          background: #f1f5f9;
+          color: #64748b;
+          border: none;
+        }
+        
+        .cancel-btn:hover {
+          background: #e2e8f0;
+        }
+        
+        .confirm-btn {
+          background: #3b82f6;
+          color: white;
+          border: none;
+        }
+        
+        .confirm-btn:hover:not(:disabled) {
+          background: #2563eb;
+        }
+        
+        @media (max-width: 640px) {
+          .container {
+            padding: 1rem;
+          }
+          
+          .section {
+            padding: 1rem;
+          }
         }
       `}</style>
     </div>
