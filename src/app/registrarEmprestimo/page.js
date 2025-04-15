@@ -19,6 +19,8 @@ export default function RegistrarEmprestimoPage() {
   const [showProfessorFields, setShowProfessorFields] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [password, setPassword] = useState("");
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -89,7 +91,20 @@ export default function RegistrarEmprestimoPage() {
       return;
     }
 
+    // Mostra o modal de senha em vez de processar diretamente
+    setShowPasswordModal(true);
+  };
+
+  const confirmarEmprestimo = async () => {
+    if (password !== "bibliotecaeepjd") {
+      setMessage({ text: "Senha incorreta!", type: "error" });
+      setShowPasswordModal(false);
+      return;
+    }
+
+    setShowPasswordModal(false);
     setLoading(true);
+    
     try {
       const emprestimoData = {
         livroId: livroInfo.id,
@@ -136,6 +151,7 @@ export default function RegistrarEmprestimoPage() {
       setMessage({ text: error.message, type: "error" });
     } finally {
       setLoading(false);
+      setPassword("");
     }
   };
 
@@ -323,6 +339,41 @@ export default function RegistrarEmprestimoPage() {
         </form>
       </div>
 
+      {/* Modal de confirmação de senha */}
+      {showPasswordModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Confirmação de Empréstimo</h3>
+            <p>Digite a senha de administrador para confirmar:</p>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Digite a senha"
+              className="password-input"
+            />
+            <div className="modal-actions">
+              <button 
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setPassword("");
+                }}
+                className="secondary-btn"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={confirmarEmprestimo}
+                className="primary-btn"
+                disabled={!password}
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
         .container {
           max-width: 800px;
@@ -400,6 +451,59 @@ export default function RegistrarEmprestimoPage() {
           padding: 10px;
           background: #e9ecef;
           border-radius: 4px;
+        }
+
+        /* Estilos do modal */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.5);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+        }
+
+        .modal {
+          background: white;
+          padding: 20px;
+          border-radius: 8px;
+          width: 90%;
+          max-width: 400px;
+        }
+
+        .modal h3 {
+          margin-top: 0;
+          color: #333;
+        }
+
+        .modal p {
+          margin-bottom: 15px;
+        }
+
+        .password-input {
+          width: 100%;
+          padding: 10px;
+          margin-bottom: 15px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+        }
+
+        .modal-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+        }
+
+        .primary-btn {
+          background-color: #28a745;
+        }
+
+        .secondary-btn {
+          background-color: #6c757d;
         }
       `}</style>
     </div>
