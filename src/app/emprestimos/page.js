@@ -299,20 +299,20 @@ export default function EmprestimosPage() {
 
       <style jsx>{`
         .container {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 20px;
-        }
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f7fa; /* Fundo cinza claro */
+  }
         
         .tabs {
-          display: flex;
-          margin-bottom: 20px;
-          border-bottom: 1px solid #ddd;
-        }
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+  }
         
         .tabs button {
           padding: 10px 20px;
-          background: none;
           border: none;
           border-bottom: 3px solid transparent;
           cursor: pointer;
@@ -451,6 +451,12 @@ export default function EmprestimosPage() {
           border-radius: 4px;
           cursor: pointer;
         }
+          .emprestimos-container {
+    background-color: white; /* Fundo branco para a área do conteúdo */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
         
         @media (max-width: 768px) {
           table {
