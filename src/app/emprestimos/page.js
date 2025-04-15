@@ -337,7 +337,6 @@ export default function EmprestimosPage() {
         }
         
         th {
-          background-color: #f8f9fa;
           font-weight: bold;
         }
         
