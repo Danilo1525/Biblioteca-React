@@ -48,35 +48,12 @@ export async function GET(request) {
         ...livro,
         status: emprestimo ? "Emprestado" : "Disponível",
         destinatario: emprestimo ? emprestimo.nomePessoa : null,
-        origem: "local",
       };
     });
 
-    // Busca na API externa se houver termo
-    let livrosExternos = [];
-    if (termo) {
-      const apiResponse = await fetch(
-        `https://openlibrary.org/search.json?q=${encodeURIComponent(
-          termo
-        )}&limit=5`
-      );
-      const dadosExternos = await apiResponse.json();
-
-      livrosExternos = dadosExternos.docs.map((livro) => ({
-        titulo: livro.title,
-        autor: livro.author_name?.join(", ") || "Autor desconhecido",
-        capa: livro.cover_i
-          ? `https://covers.openlibrary.org/b/id/${livro.cover_i}-M.jpg`
-          : null,
-        ano: livro.first_publish_year,
-        status: "Consulta externa",
-        origem: "externo",
-      }));
-    }
-
     return Response.json({
       estatisticas,
-      livros: [...livrosFormatados, ...livrosExternos],
+      livros: livrosFormatados,
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
