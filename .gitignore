@@ -141,4 +141,17 @@ dist
 # SvelteKit build / generate output
 .svelte-kit
 
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Neon DB e outras configurações sensíveis
+/prisma/migrations/
+/prisma/*.db
+*.env*
+!.env.example
+
 # End of https://www.toptal.com/developers/gitignore/api/node
