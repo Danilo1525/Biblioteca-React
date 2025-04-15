@@ -1,3 +1,4 @@
+//src/app/api/listaEmprestimos/route.js
 import { listarEmprestimos, listarHistoricoEmprestimos, confirmarDevolucao, getEmprestimoPorId } from '../../../../lib/db';
 
 export async function GET(request) {
@@ -49,11 +50,28 @@ export async function DELETE(request) {
       return Response.json({ error: "Empréstimo não encontrado" }, { status: 404 });
     }
 
-    // Aqui você precisaria adicionar a função para deletar o empréstimo no seu lib/db.js
-    // Por exemplo: await deletarEmprestimo(data.id);
+    // Verifica se o empréstimo já foi devolvido
+    if (emprestimo.devolvido) {
+      return Response.json({ 
+        error: "Não é possível excluir empréstimos já devolvidos",
+        code: "EMPRESTIMO_JA_DEVOLVIDO"
+      }, { status: 400 });
+    }
+
+    // Deleta o empréstimo
+    await deletarEmprestimo(data.id);
     
-    return Response.json({ success: true });
+    return Response.json({ 
+      success: true, 
+      message: "Empréstimo deletado com sucesso",
+      deletedId: data.id  // Envia o ID deletado para referência no frontend
+    });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error("Erro ao deletar empréstimo:", error);
+    return Response.json({ 
+      error: "Erro ao deletar empréstimo",
+      details: error.message,
+      code: "ERRO_INTERNO"
+    }, { status: 500 });
   }
 }

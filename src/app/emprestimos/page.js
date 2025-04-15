@@ -62,8 +62,10 @@ export default function EmprestimosPage() {
   };
 
   const handleExcluirEmprestimo = async () => {
+    if (!emprestimoParaDeletar) return;
+    
     try {
-      const response = await fetch('/api/listaEmprestimos', {
+      const response = await fetch('/api/emprestimos', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -73,20 +75,32 @@ export default function EmprestimosPage() {
 
       const data = await response.json();
       
-      if (response.ok) {
-        setEmprestimos(prev => prev.filter(emp => emp.id !== emprestimoParaDeletar.id));
-        setHistorico(prev => prev.filter(emp => emp.id !== emprestimoParaDeletar.id));
-        setMessage({ text: 'Empréstimo excluído com sucesso!', type: 'success' });
-      } else {
+      if (!response.ok) {
+        // Trata erros específicos
+        if (data.code === "EMPRESTIMO_JA_DEVOLVIDO") {
+          throw new Error("Este empréstimo já foi devolvido e não pode ser excluído");
+        }
         throw new Error(data.error || 'Erro ao excluir empréstimo');
       }
+
+      // Atualiza ambos os estados (ativos e histórico)
+      setEmprestimos(prev => prev.filter(emp => emp.id !== emprestimoParaDeletar.id));
+      setHistorico(prev => prev.filter(emp => emp.id !== emprestimoParaDeletar.id));
+      
+      setMessage({ 
+        text: data.message || 'Empréstimo excluído com sucesso!', 
+        type: 'success' 
+      });
     } catch (error) {
-      setMessage({ text: error.message, type: 'error' });
+      setMessage({ 
+        text: error.message, 
+        type: 'error',
+        duration: 5000  // Exibe por 5 segundos
+      });
     } finally {
       setEmprestimoParaDeletar(null);
     }
-  };
-
+};
   const formatarData = (dataString) => {
     try {
       const options = { day: '2-digit', month: '2-digit', year: 'numeric' };

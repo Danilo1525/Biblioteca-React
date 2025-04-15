@@ -25,23 +25,4 @@ export async function POST(request) {
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
-export async function DELETE(request, { params }) {
-  const { id } = params; // ID do empréstimo a ser deletado
-
-  try {
-    // Conexão com o Neon DB (exemplo com Prisma)
-    await prisma.emprestimo.delete({
-      where: { id: parseInt(id) }, // Certifique-se de converter para número se necessário
-    });
-
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-    });
-  } catch (error) {
-    console.error("Erro ao deletar empréstimo:", error);
-    return new Response(JSON.stringify({ error: "Falha ao deletar" }), {
-      status: 500,
-    });
-  }
-}
 }
