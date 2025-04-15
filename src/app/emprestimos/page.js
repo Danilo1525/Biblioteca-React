@@ -65,7 +65,7 @@ export default function EmprestimosPage() {
     if (!emprestimoParaDeletar) return;
     
     try {
-      const response = await fetch('/api/emprestimos', {
+      const response = await fetch('/api/listaEmprestimos', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
