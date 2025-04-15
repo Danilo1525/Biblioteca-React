@@ -38,36 +38,48 @@ export async function POST(request) {
 
 export async function DELETE(request) {
   try {
-    const data = await request.json();
+    console.log("Iniciando DELETE - Corpo da requisição:", await request.clone().text());
     
+    const data = await request.json();
+    console.log("ID recebido para deletar:", data.id);
+
     if (!data.id) {
+      console.error("ID não fornecido");
       return Response.json({ error: "ID do empréstimo não fornecido" }, { status: 400 });
     }
 
-    // Verifica se o empréstimo existe
     const emprestimo = await getEmprestimoPorId(data.id);
+    console.log("Empréstimo encontrado:", emprestimo);
+
     if (!emprestimo) {
+      console.error("Empréstimo não encontrado para ID:", data.id);
       return Response.json({ error: "Empréstimo não encontrado" }, { status: 404 });
     }
 
-    // Verifica se o empréstimo já foi devolvido
     if (emprestimo.devolvido) {
+      console.error("Tentativa de deletar empréstimo já devolvido");
       return Response.json({ 
         error: "Não é possível excluir empréstimos já devolvidos",
         code: "EMPRESTIMO_JA_DEVOLVIDO"
       }, { status: 400 });
     }
 
-    // Deleta o empréstimo
+    console.log("Chamando deletarEmprestimo para ID:", data.id);
     await deletarEmprestimo(data.id);
-    
+    console.log("Empréstimo deletado com sucesso");
+
     return Response.json({ 
       success: true, 
       message: "Empréstimo deletado com sucesso",
-      deletedId: data.id  // Envia o ID deletado para referência no frontend
+      deletedId: data.id
     });
+
   } catch (error) {
-    console.error("Erro ao deletar empréstimo:", error);
+    console.error("Erro completo ao deletar empréstimo:", {
+      message: error.message,
+      stack: error.stack,
+      rawError: error
+    });
     return Response.json({ 
       error: "Erro ao deletar empréstimo",
       details: error.message,

@@ -62,9 +62,9 @@ export default function EmprestimosPage() {
   };
 
   const handleExcluirEmprestimo = async () => {
-    if (!emprestimoParaDeletar) return;
-    
     try {
+      console.log("Tentando deletar empréstimo ID:", emprestimoParaDeletar.id);
+      
       const response = await fetch('/api/listaEmprestimos', {
         method: 'DELETE',
         headers: {
@@ -72,35 +72,38 @@ export default function EmprestimosPage() {
         },
         body: JSON.stringify({ id: emprestimoParaDeletar.id })
       });
-
-      const data = await response.json();
+  
+      console.log("Resposta recebida:", {
+        status: response.status,
+        statusText: response.statusText
+      });
+  
+      const textResponse = await response.text();
+      console.log("Texto da resposta:", textResponse);
+  
+      const data = textResponse ? JSON.parse(textResponse) : {};
       
       if (!response.ok) {
-        // Trata erros específicos
-        if (data.code === "EMPRESTIMO_JA_DEVOLVIDO") {
-          throw new Error("Este empréstimo já foi devolvido e não pode ser excluído");
-        }
-        throw new Error(data.error || 'Erro ao excluir empréstimo');
+        throw new Error(data.error || `Erro ${response.status}`);
       }
-
-      // Atualiza ambos os estados (ativos e histórico)
+  
       setEmprestimos(prev => prev.filter(emp => emp.id !== emprestimoParaDeletar.id));
-      setHistorico(prev => prev.filter(emp => emp.id !== emprestimoParaDeletar.id));
-      
-      setMessage({ 
-        text: data.message || 'Empréstimo excluído com sucesso!', 
-        type: 'success' 
-      });
+      setMessage({ text: 'Empréstimo excluído com sucesso!', type: 'success' });
+  
     } catch (error) {
+      console.error("Erro completo no frontend:", {
+        message: error.message,
+        stack: error.stack,
+        rawError: error
+      });
       setMessage({ 
-        text: error.message, 
-        type: 'error',
-        duration: 5000  // Exibe por 5 segundos
+        text: error.message || 'Erro ao excluir empréstimo', 
+        type: 'error' 
       });
     } finally {
       setEmprestimoParaDeletar(null);
     }
-};
+  };
   const formatarData = (dataString) => {
     try {
       const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
