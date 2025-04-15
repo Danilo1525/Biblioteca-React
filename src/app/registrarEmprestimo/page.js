@@ -137,288 +137,321 @@ export default function RegistrarEmprestimoPage() {
         <p className="subtitle">Biblioteca Escola Estadual Padre José Daniel</p>
       </header>
 
-      <div className="form-container">
-        <div className="form-section">
-          <h2>Buscar Livro</h2>
-          <form onSubmit={handleBuscarLivro} className="search-form">
-            <div className="input-group">
+      {message.text && (
+        <div className={`message ${message.type}`}>
+          {message.text}
+        </div>
+      )}
+
+      <div className="card">
+        <h2>Buscar Livro</h2>
+        <form onSubmit={handleBuscarLivro} className="form">
+          <div className="input-group">
+            <input
+              type="number"
+              id="buscar_tombo"
+              min="1"
+              onChange={validateNumber}
+              placeholder="Número do Tombo"
+              value={formData.buscar_tombo}
+              disabled={loading}
+            />
+            <button type="submit" disabled={loading} className="primary-btn">
+              {loading ? "Buscando..." : "Buscar Livro"}
+            </button>
+          </div>
+        </form>
+        
+        {livroInfo && (
+          <div className="livro-info">
+            <h3>Informações do Livro</h3>
+            <div className="livro-details">
+              <p><span>Título:</span> {livroInfo.titulo}</p>
+              <p><span>Autor:</span> {livroInfo.autor}</p>
+              <p><span>Tombo:</span> {livroInfo.numeroTombo}</p>
+              <p className={`status ${livroInfo.status.toLowerCase()}`}>
+                <span>Status:</span> {livroInfo.status}
+              </p>
+              {livroInfo.status === 'Emprestado' && (
+                <p><span>Emprestado para:</span> {livroInfo.destinatario}</p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <h2>Dados do Empréstimo</h2>
+        <form onSubmit={handleEmprestarLivro} className="form">
+          <div className="form-grid">
+            <div className="form-group">
+              <label htmlFor="tombo_emprestimo">Tombo do Livro</label>
+              <input
+                type="text"
+                id="tombo_emprestimo"
+                value={formData.tombo_emprestimo}
+                onChange={handleChange}
+                required
+                readOnly
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="quantidade_emprestimo">Quantidade</label>
               <input
                 type="number"
-                id="buscar_tombo"
+                id="quantidade_emprestimo"
                 min="1"
-                placeholder="Digite o número do tombo"
-                value={formData.buscar_tombo}
                 onChange={validateNumber}
+                value={formData.quantidade_emprestimo}
+                required
                 disabled={loading}
               />
-              <button type="submit" disabled={loading}>
-                {loading ? "Buscando..." : "Buscar"}
-              </button>
             </div>
-          </form>
-        </div>
 
-        <div className="form-section">
-          <h2>Dados do Empréstimo</h2>
-          <form onSubmit={handleEmprestarLivro} className="loan-form">
-            <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="tipo_pessoa">Tipo de Pessoa</label>
+              <select
+                id="tipo_pessoa"
+                onChange={handleTipoPessoaChange}
+                value={formData.tipo_pessoa}
+                required
+                disabled={loading}
+              >
+                <option value="" disabled>Selecione o tipo</option>
+                <option value="aluno">Aluno</option>
+                <option value="professor">Professor</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="data_devolucao">Data de Devolução</label>
+              <input
+                type="date"
+                id="data_devolucao"
+                value={formData.data_devolucao}
+                onChange={handleChange}
+                required
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          {showAlunoFields && (
+            <div className="form-grid">
               <div className="form-group">
-                <label htmlFor="tombo_emprestimo">Tombo do Livro</label>
+                <label htmlFor="nome_estudante">Nome do Aluno</label>
                 <input
                   type="text"
-                  id="tombo_emprestimo"
-                  value={formData.tombo_emprestimo}
-                  readOnly
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="quantidade_emprestimo">Quantidade</label>
-                <input
-                  type="number"
-                  id="quantidade_emprestimo"
-                  min="1"
-                  value={formData.quantidade_emprestimo}
-                  onChange={validateNumber}
+                  id="nome_estudante"
+                  value={formData.nome_estudante}
+                  onChange={handleChange}
+                  required
                   disabled={loading}
                 />
               </div>
-            </div>
 
-            <div className="form-row">
               <div className="form-group">
-                <label htmlFor="tipo_pessoa">Tipo de Pessoa</label>
+                <label htmlFor="serie_estudante">Série</label>
                 <select
-                  id="tipo_pessoa"
-                  value={formData.tipo_pessoa}
-                  onChange={handleTipoPessoaChange}
+                  id="serie_estudante"
+                  value={formData.serie_estudante}
+                  onChange={handleChange}
+                  required
                   disabled={loading}
                 >
-                  <option value="">Selecione o tipo</option>
-                  <option value="aluno">Aluno</option>
-                  <option value="professor">Professor</option>
+                  <option value="" disabled>Selecione a série</option>
+                  <optgroup label="Ensino Fundamental">
+                    <option value="6_matutino">6º Ano - Matutino</option>
+                    <option value="6_vespertino">6º Ano - Vespertino</option>
+                    <option value="6_integral">6º Ano - Integral</option>
+                  </optgroup>
+                  <optgroup label="Ensino Médio">
+                    <option value="1_vespertino">1º Ano - Vespertino</option>
+                    <option value="1_integral">1º Ano - Integral</option>
+                  </optgroup>
                 </select>
               </div>
 
               <div className="form-group">
-                <label htmlFor="data_devolucao">Data de Devolução</label>
-                <input
-                  type="date"
-                  id="data_devolucao"
-                  value={formData.data_devolucao}
+                <label htmlFor="turma">Turma</label>
+                <select
+                  id="turma"
+                  value={formData.turma}
                   onChange={handleChange}
                   disabled={loading}
-                />
+                >
+                  <option value="" disabled>Selecione a turma</option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                </select>
               </div>
             </div>
+          )}
 
-            {/* Campos condicionais para aluno/professor */}
-            {showAlunoFields && (
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="nome_estudante">Nome do Aluno</label>
-                  <input
-                    type="text"
-                    id="nome_estudante"
-                    value={formData.nome_estudante}
-                    onChange={handleChange}
-                    disabled={loading}
-                  />
-                </div>
+          {showProfessorFields && (
+            <div className="form-group">
+              <label htmlFor="nome_professor">Nome do Professor</label>
+              <input
+                type="text"
+                id="nome_professor"
+                value={formData.nome_professor}
+                onChange={handleChange}
+                required
+                disabled={loading}
+              />
+            </div>
+          )}
 
-                <div className="form-group">
-                  <label htmlFor="serie_estudante">Série</label>
-                  <select
-                    id="serie_estudante"
-                    value={formData.serie_estudante}
-                    onChange={handleChange}
-                    disabled={loading}
-                  >
-                    <option value="">Selecione a série</option>
-                    {/* Opções mantidas como no original */}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="turma">Turma</label>
-                  <select
-                    id="turma"
-                    value={formData.turma}
-                    onChange={handleChange}
-                    disabled={loading}
-                  >
-                    <option value="">Selecione a turma</option>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                  </select>
-                </div>
-              </div>
-            )}
-
-            {showProfessorFields && (
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="nome_professor">Nome do Professor</label>
-                  <input
-                    type="text"
-                    id="nome_professor"
-                    value={formData.nome_professor}
-                    onChange={handleChange}
-                    disabled={loading}
-                  />
-                </div>
-              </div>
-            )}
-
-            <button type="submit" className="submit-btn" disabled={loading || !livroInfo}>
-              Registrar Empréstimo
-            </button>
-          </form>
-        </div>
+          <button 
+            type="submit" 
+            disabled={loading || !livroInfo} 
+            className="submit-btn"
+          >
+            {loading ? "Processando..." : "Registrar Empréstimo"}
+          </button>
+        </form>
       </div>
+
+      {showPasswordModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Confirmação de Empréstimo</h3>
+            <p>Digite a senha de administrador para confirmar o empréstimo:</p>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Digite a senha"
+              className="password-input"
+            />
+            <div className="modal-actions">
+              <button 
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setPassword("");
+                }}
+                className="secondary-btn"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={confirmarEmprestimo}
+                className="primary-btn"
+                disabled={!password}
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         .container {
           max-width: 1000px;
           margin: 0 auto;
-          padding: 20px;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          padding: 2rem;
+          font-family: 'Segoe UI', system-ui, sans-serif;
         }
 
-        .header {
-          text-align: center;
-          margin-bottom: 30px;
-        }
-
-        .header h1 {
-          color: #2c3e50;
-          font-size: 2.2rem;
-          margin-bottom: 5px;
-        }
-
-        .subtitle {
-          color: #7f8c8d;
-          font-style: italic;
-          font-size: 1.1rem;
-        }
-
-        .form-container {
-          background: white;
-          border-radius: 10px;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-          padding: 25px;
-        }
-
-        .form-section {
-          margin-bottom: 30px;
-        }
-
-        h2 {
-          color: #3498db;
-          margin-bottom: 20px;
-          font-size: 1.5rem;
-          border-bottom: 1px solid #eee;
-          padding-bottom: 10px;
-        }
-
-        .form-row {
-          display: flex;
-          gap: 20px;
-          margin-bottom: 20px;
-          flex-wrap: wrap;
-        }
-
-        .form-group {
-          flex: 1;
-          min-width: 200px;
-        }
-
-        label {
-          display: block;
-          margin-bottom: 8px;
-          font-weight: 600;
-          color: #2c3e50;
-          font-size: 0.95rem;
-        }
-
-        input, select {
+        /* Inputs */
+        .full-width-input {
           width: 100%;
-          padding: 12px;
-          border: 1px solid #ddd;
-          border-radius: 6px;
+          padding: 0.8rem 1rem;
           font-size: 1rem;
-          transition: border-color 0.3s;
+          border: 2px solid #d1d5db;
+          border-radius: 0.5rem;
+          transition: all 0.2s;
         }
 
-        input:focus, select:focus {
+        .full-width-input:focus {
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
           outline: none;
-          border-color: #3498db;
-          box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
         }
 
-        input[type="number"] {
-          -moz-appearance: textfield;
-        }
-
-        input[readonly] {
-          background-color: #f9f9f9;
-        }
-
+        /* Grupo de Input */
         .input-group {
           display: flex;
-          gap: 10px;
+          gap: 0.5rem;
+          margin-bottom: 1.5rem;
         }
 
-        .input-group input {
-          flex: 1;
-        }
-
-        button {
-          padding: 12px 20px;
-          background-color: #3498db;
+        /* Botões */
+        .action-btn {
+          padding: 0.8rem 1.5rem;
+          background-color: #3b82f6;
           color: white;
           border: none;
-          border-radius: 6px;
-          font-size: 1rem;
+          border-radius: 0.5rem;
           font-weight: 600;
           cursor: pointer;
-          transition: background-color 0.3s;
+          transition: all 0.2s;
+          white-space: nowrap;
         }
 
-        button:hover:not(:disabled) {
-          background-color: #2980b9;
+        .action-btn:hover {
+          background-color: #2563eb;
         }
 
-        button:disabled {
-          background-color: #95a5a6;
+        .action-btn:disabled {
+          background-color: #9ca3af;
           cursor: not-allowed;
         }
 
-        .submit-btn {
-          background-color: #27ae60;
-          width: 100%;
-          max-width: 300px;
-          margin: 20px auto 0;
-          display: block;
+        /* Card de Informações */
+        .book-info-card {
+          background: #f9fafb;
+          border-radius: 0.5rem;
+          padding: 1.5rem;
+          margin-top: 1rem;
+          border-left: 4px solid #3b82f6;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
-        .submit-btn:hover:not(:disabled) {
-          background-color: #219955;
+        .book-details p {
+          margin: 0.5rem 0;
+          line-height: 1.6;
         }
 
+        .detail-label {
+          font-weight: 600;
+          color: #4b5563;
+          display: inline-block;
+          min-width: 120px;
+        }
+
+        /* Status */
+        .status {
+          padding: 0.2rem 0.5rem;
+          border-radius: 0.25rem;
+          font-size: 0.9rem;
+        }
+
+        .status.disponível {
+          background-color: #dcfce7;
+          color: #166534;
+        }
+
+        .status.emprestado {
+          background-color: #fee2e2;
+          color: #991b1b;
+        }
+
+        /* Responsividade */
         @media (max-width: 768px) {
-          .form-row {
-            flex-direction: column;
-            gap: 15px;
-          }
-
-          .form-group {
-            min-width: 100%;
+          .container {
+            padding: 1rem;
           }
 
           .input-group {
             flex-direction: column;
+          }
+
+          .action-btn {
+            width: 100%;
           }
         }
       `}</style>
