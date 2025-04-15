@@ -1,5 +1,5 @@
 //src/app/api/listaEmprestimos/route.js
-import { listarEmprestimos, listarHistoricoEmprestimos, confirmarDevolucao, getEmprestimoPorId } from '../../../../lib/db';
+import { listarEmprestimos, listarHistoricoEmprestimos, confirmarDevolucao, getEmprestimoPorId, deletarEmprestimo } from '../../../../lib/db';
 
 export async function GET(request) {
   try {
