@@ -21,6 +21,28 @@ export default function RegistrarEmprestimoPage() {
   const [message, setMessage] = useState({ text: "", type: "" });
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [password, setPassword] = useState("");
+  const [minDate, setMinDate] = useState("");
+
+  useEffect(() => {
+    // Define a data mínima como hoje no formato YYYY-MM-DD
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
+    setMinDate(formattedDate);
+  }, []);
+
+  const validateDate = (e) => {
+    const selectedDate = new Date(e.target.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+      setMessage({ text: "Não é possível selecionar datas passadas", type: "error" });
+      setFormData(prev => ({ ...prev, data_devolucao: "" }));
+    } else {
+      handleChange(e);
+      setMessage({ text: "", type: "" }); // Limpa mensagens de erro
+    }
+  };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -321,17 +343,21 @@ export default function RegistrarEmprestimoPage() {
             </div>
           )}
 
-          <div className="form-group">
-            <label htmlFor="data_devolucao">Data de Devolução:</label>
-            <input
-              type="date"
-              id="data_devolucao"
-              value={formData.data_devolucao}
-              onChange={handleChange}
-              required
-              disabled={loading}
-            />
-          </div>
+<div className="form-group">
+        <label htmlFor="data_devolucao">Data de Devolução:</label>
+        <input
+          type="date"
+          id="data_devolucao"
+          value={formData.data_devolucao}
+          onChange={validateDate}
+          required
+          disabled={loading}
+          min={minDate}
+        />
+        {formData.data_devolucao && new Date(formData.data_devolucao) < new Date() && (
+          <p className="date-error">Data inválida! Selecione uma data futura.</p>
+        )}
+      </div>
 
           <button type="submit" disabled={loading || !livroInfo} className="submit-btn">
             {loading ? "Processando..." : "Registrar Empréstimo"}
@@ -413,7 +439,15 @@ export default function RegistrarEmprestimoPage() {
           margin-bottom: 5px;
           font-weight: bold;
         }
-        
+        input:invalid {
+  border-color: #dc3545;
+}
+
+.date-error {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 5px;
+}
         input, select {
           width: 100%;
           padding: 8px;
