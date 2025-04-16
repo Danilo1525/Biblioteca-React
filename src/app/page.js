@@ -5,15 +5,25 @@ export default function Home() {
   const [termoBusca, setTermoBusca] = useState("");
   const [resultados, setResultados] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [filtros, setFiltros] = useState({
+    status: 'todos',
+    ordenacao: 'titulo',
+    dataEmprestimo: ''
+  });
 
   const handleBuscarLivros = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const res = await fetch(
-        `/api/livros?termo=${encodeURIComponent(termoBusca)}`
-      );
+      const queryParams = new URLSearchParams({
+        termo: termoBusca,
+        status: filtros.status,
+        ordenacao: filtros.ordenacao,
+        data: filtros.dataEmprestimo
+      }).toString();
+
+      const res = await fetch(`/api/livros?${queryParams}`);
       const data = await res.json();
 
       if (res.ok) {
