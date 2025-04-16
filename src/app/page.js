@@ -5,25 +5,15 @@ export default function Home() {
   const [termoBusca, setTermoBusca] = useState("");
   const [resultados, setResultados] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [filtros, setFiltros] = useState({
-    status: 'todos',
-    ordenacao: 'titulo',
-    dataEmprestimo: ''
-  });
 
   const handleBuscarLivros = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const queryParams = new URLSearchParams({
-        termo: termoBusca,
-        status: filtros.status,
-        ordenacao: filtros.ordenacao,
-        data: filtros.dataEmprestimo
-      }).toString();
-
-      const res = await fetch(`/api/livros?${queryParams}`);
+      const res = await fetch(
+        `/api/livros?termo=${encodeURIComponent(termoBusca)}`
+      );
       const data = await res.json();
 
       if (res.ok) {
@@ -46,6 +36,8 @@ export default function Home() {
 
         <form onSubmit={handleBuscarLivros} className="form-busca">
           <div className="input-group">
+            {" "}
+            {/* Nova div container */}
             <input
               type="text"
               value={termoBusca}
@@ -53,35 +45,6 @@ export default function Home() {
               placeholder="Digite título, autor ou tombo"
               className="campo-busca"
             />
-            <div className="filtros-container">
-              <select
-                value={filtros.status}
-                onChange={(e) => setFiltros(prev => ({...prev, status: e.target.value}))}
-                className="filtro-select"
-              >
-                <option value="todos">Todos os Status</option>
-                <option value="disponivel">Disponíveis</option>
-                <option value="emprestado">Emprestados</option>
-              </select>
-
-              <select
-                value={filtros.ordenacao}
-                onChange={(e) => setFiltros(prev => ({...prev, ordenacao: e.target.value}))}
-                className="filtro-select"
-              >
-                <option value="titulo">Ordenar por Título</option>
-                <option value="autor">Ordenar por Autor</option>
-                <option value="tombo">Ordenar por Tombo</option>
-              </select>
-
-              <input
-                type="date"
-                value={filtros.dataEmprestimo}
-                onChange={(e) => setFiltros(prev => ({...prev, dataEmprestimo: e.target.value}))}
-                className="filtro-select"
-                placeholder="Filtrar por data"
-              />
-            </div>
             <button
               type="submit"
               disabled={loading || !termoBusca.trim()}
@@ -411,33 +374,6 @@ export default function Home() {
           border-radius: 8px;
           color: #7f8c8d;
         }
-          .filtros-container {
-          display: flex;
-          gap: 0.5rem;
-          margin-left: 0.5rem;
-          flex-wrap: wrap;
-        }
-
-        .filtro-select {
-          padding: 0.6rem;
-          border-radius: 6px;
-          border: 1px solid #ddd;
-          background: white;
-          font-size: 0.9rem;
-          color: #2c3e50;
-          cursor: pointer;
-          transition: all 0.2s;
-          min-width: 180px;
-        }
-
-        .filtro-select[type="date"] {
-          min-width: 160px;
-        }
-
-        .filtro-select:hover {
-          border-color: #3498db;
-          box-shadow: 0 2px 4px rgba(52, 152, 219, 0.1);
-        }
 
         @media (max-width: 768px) {
           .container {
@@ -463,17 +399,6 @@ export default function Home() {
             margin-bottom: 0.5rem !important;
           }
 
-          .filtros-container {
-            flex-direction: column;
-            width: 100%;
-            margin-left: 0;
-            gap: 0.5rem;
-          }
-
-          .filtro-select {
-            width: 100%;
-            min-width: unset;
-          }
           .botao-busca {
             border-radius: 8px !important;
             width: 100%;
@@ -501,7 +426,6 @@ export default function Home() {
             padding: 1rem;
           }
         }
-          
 
         @media (max-width: 480px) {
           .titulo-principal {
